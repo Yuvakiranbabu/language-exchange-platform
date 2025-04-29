@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SpeakEasy - Chat with {{ partner_name }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;400&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(120deg, #6366f1 0%, #a5b4fc 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .navbar {
+            background: rgba(255,255,255,0.85) !important;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 2px 16px rgba(99,102,241,0.08);
+        }
+        .navbar-brand {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 2rem;
+            color: #6366f1 !important;
+            letter-spacing: 1px;
+        }
+        .chat-container {
+            background: rgba(255,255,255,0.92);
+            border-radius: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(99,102,241,0.15);
+            max-width: 800px;
+            width: 95%;
+            margin: 90px auto 30px auto;
+            padding: 2rem 1.5rem 1.5rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            min-height: 75vh;
+            animation: fadeInUp 1.2s cubic-bezier(.39,.575,.565,1) both;
+        }
+        @keyframes fadeInUp {
+            0% { opacity: 0; transform: translateY(40px);}
+            100% { opacity: 1; transform: translateY(0);}
+        }
+        .chat-header {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .chat-header h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2rem;
+            color: #4338ca;
+            margin-bottom: 0;
+        }
+        .messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .message {
+            max-width: 65%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            margin: 5px 0;
+            word-wrap: break-word;
+            position: relative;
+            font-size: 1.05em;
+            box-shadow: 0 2px 8px rgba(99,102,241,0.07);
+        }
+        .sent {
+            background: #6366f1;
+            color: #fff;
+            align-self: flex-end;
+            border-bottom-right-radius: 6px;
+        }
+        .received {
+            background: #e0e7ff;
+            color: #4338ca;
+            align-self: flex-start;
+            border-bottom-left-radius: 6px;
+        }
+        .seen {
+            color: #22c55e;
+            font-size: 0.8em;
+            position: absolute;
+            right: 10px;
+            bottom: 2px;
+        }
+        .typing {
+            color: #6c757d;
+            font-style: italic;
+            align-self: center;
+        }
+        .input-area {
+            display: flex;
+            gap: 10px;
+            padding: 10px 0 0 0;
+        }
+        .input-area input[type="text"] {
+            flex-grow: 1;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 2rem;
+            font-size: 1em;
+        }
+        .input-area button {
+            padding: 12px 24px;
+            background: #6366f1;
+            color: #fff;
+            border: none;
+            border-radius: 2rem;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .input-area button:hover {
+            background: #4338ca;
+        }
+        .phrase-form {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        .phrase-select {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 2rem;
+            font-size: 1em;
+        }
+        .phrase-form button {
+            padding: 10px 20px;
+            background: #6366f1;
+            color: #fff;
+            border: none;
+            border-radius: 2rem;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .phrase-form button:hover {
+            background: #4338ca;
+        }
+        .rate-button {
+            padding: 10px 20px;
+            background: #22c55e;
+            color: #fff;
+            border: none;
+            border-radius: 2rem;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        .rate-button:hover {
+            background: #16a34a;
+        }
+        .rating-form {
+            display: none;
+            margin-top: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 1rem;
+        }
+        .rating-form.active {
+            display: block;
+        }
+        .star-rating {
+            font-size: 24px;
+            color: #ccc;
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+        .star-rating label { cursor: pointer; padding: 5px; }
+        .star-rating label:hover, .star-rating label:hover ~ label { color: #ff0; }
+        .star-rating input:checked ~ label { color: #ff0; }
+        .rating-preview { text-align: center; color: #333; margin-top: 10px; font-size: 1.1em; }
+        textarea { width: 100%; padding: 10px; margin-top: 10px; border: 1px solid #ccc; border-radius: 5px; resize: vertical; }
+        .rating-instructions { color: #666; font-size: 0.9em; margin-top: 5px; }
+        @media (max-width: 767px) {
+            .chat-container { padding: 1rem 0.3rem; }
+            .chat-header h1 { font-size: 1.2rem; }
+            .message { font-size: 0.95em; padding: 10px 12px; }
+            .input-area button, .phrase-form button, .rate-button { font-size: 0.95em; padding: 10px 12px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">SpeakEasy</a>
+            <div class="ms-auto">
+                <a href="/dashboard?email={{ user_email }}" class="btn btn-outline-primary rounded-pill">Dashboard</a>
+            </div>
+        </div>
+    </nav>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1><i class="fas fa-comments me-2"></i>Chat with {{ partner_name }}</h1>
+        </div>
+        <div class="messages" id="messages">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="message {{ 'sent' if message[0] == user_email else 'received' }}">
+                        {{ message[1] }} <span style="font-size: 0.8em; color: #666;">({{ message[2] }})</span>
+                        {% if message[0] != user_email and message[3] == 1 %}<span class="seen">Seen</span>{% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="message received">No messages yet!</div>
+            {% endif %}
+            <div id="typing-indicator" class="typing" style="display: none;"></div>
+        </div>
+        <form method="POST" action="/send_message" id="chat-form">
+            <input type="hidden" name="user_email" value="{{ user_email }}">
+            <input type="hidden" name="partner_email" value="{{ partner_email }}">
+            <div class="input-area">
+                <input type="text" name="message" id="message-input" placeholder="Type a message..." required>
+                <button type="submit"><i class="fas fa-paper-plane"></i> Send</button>
+            </div>
+        </form>
+        <form method="POST" action="/send_phrase" class="phrase-form" id="phrase-form">
+            <input type="hidden" name="user_email" value="{{ user_email }}">
+            <input type="hidden" name="partner_email" value="{{ partner_email }}">
+            <select name="phrase" class="phrase-select" required>
+                <option value="" disabled selected>Select a phrase</option>
+                <option value="Hello! How are you?">Hello! How are you?</option>
+                <option value="Thank you very much!">Thank you very much!</option>
+                <option value="Can you help me with this?">Can you help me with this?</option>
+                <option value="See you later!">See you later!</option>
+            </select>
+            <button type="submit"><i class="fas fa-comment-dots"></i> Send Phrase</button>
+        </form>
+        <button class="rate-button" onclick="toggleRatingForm()"><i class="fas fa-star"></i> Rate Partner</button>
+        <div class="rating-form" id="rating-form">
+            <form method="POST" action="/submit_feedback">
+                <input type="hidden" name="user_email" value="{{ user_email }}">
+                <input type="hidden" name="partner_email" value="{{ partner_email }}">
+                <div class="rating-instructions">Hover over stars to preview your rating, then click to select!</div>
+                <div class="star-rating">
+                    <input type="radio" id="star5" name="rating" value="5" required><label for="star5" title="Excellent">&#9733;</label>
+                    <input type="radio" id="star4" name="rating" value="4"><label for="star4" title="Very Good">&#9733;</label>
+                    <input type="radio" id="star3" name="rating" value="3"><label for="star3" title="Good">&#9733;</label>
+                    <input type="radio" id="star2" name="rating" value="2"><label for="star2" title="Fair">&#9733;</label>
+                    <input type="radio" id="star1" name="rating" value="1"><label for="star1" title="Poor">&#9733;</label>
+                </div>
+                <div class="rating-preview" id="rating-preview">Preview your rating here</div>
+                <label>Comments (optional):</label>
+                <textarea name="comment" rows="4" placeholder="Share your thoughts about the chat..."></textarea>
+                <button type="submit" class="btn btn-success rounded-pill mt-2">Submit Rating</button>
+            </form>
+        </div>
+    </div>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script>
+        const socket = io('http://127.0.0.1:5004');
+        const userEmail = "{{ user_email }}";
+        const partnerEmail = "{{ partner_email }}";
+        const partnerName = "{{ partner_name }}";
+        const room = [userEmail, partnerEmail].sort().join(':');
+        const messagesDiv = document.getElementById('messages');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const messageInput = document.getElementById('message-input');
+        const ratingForm = document.getElementById('rating-form');
+        const ratingPreview = document.getElementById('rating-preview');
+
+        socket.emit('join', { user: userEmail, partner: partnerEmail }, (response) => {
+            console.log('Joined chat room:', response);
+        });
+
+        socket.on('connect', () => {
+            console.log('Connected to SocketIO server for chat');
+        });
+
+        socket.on('message', (data) => {
+            if (data.user !== userEmail) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message received';
+                messageDiv.innerHTML = `${data.message} <span style="font-size: 0.8em; color: #666;">(${new Date().toLocaleTimeString()})</span>`;
+                messagesDiv.appendChild(messageDiv);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        });
+
+        socket.on('typing', (data) => {
+            if (data.user !== userEmail) {
+                typingIndicator.textContent = `${partnerName} is typing...`;
+                typingIndicator.style.display = 'block';
+            }
+        });
+
+        socket.on('stop_typing', (data) => {
+            if (data.user !== userEmail) {
+                typingIndicator.style.display = 'none';
+            }
+        });
+
+        messageInput.addEventListener('input', () => {
+            socket.emit('typing', { user: userEmail, partner: partnerEmail, name: "{{ user_name }}" });
+        });
+
+        messageInput.addEventListener('blur', () => {
+            socket.emit('stop_typing', { user: userEmail, partner: partnerEmail });
+        });
+
+        document.getElementById('chat-form').addEventListener('submit', (e) => {
+            socket.emit('stop_typing', { user: userEmail, partner: partnerEmail });
+            setTimeout(() => messagesDiv.scrollTop = messagesDiv.scrollHeight, 0);
+        });
+
+        function toggleRatingForm() {
+            ratingForm.classList.toggle('active');
+            if (ratingForm.classList.contains('active')) {
+                const stars = ratingForm.querySelectorAll('.star-rating label');
+                stars.forEach(star => {
+                    star.addEventListener('mouseover', () => {
+                        const value = star.getAttribute('for').replace('star', '');
+                        ratingPreview.textContent = `Rating: ${value} stars`;
+                    });
+                    star.addEventListener('mouseout', () => {
+                        const checked = ratingForm.querySelector('input[name="rating"]:checked');
+                        ratingPreview.textContent = checked ? `Rating: ${checked.value} stars` : 'Preview your rating here';
+                    });
+                });
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
